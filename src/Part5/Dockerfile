@@ -1,23 +1,26 @@
-FROM debian
-#LABEL version="1.0"
+FROM ubuntu
+WORKDIR /home
 
-
-RUN apt-get update && apt-get install -y \
-    nginx \
-    gcc \
-    libfcgi-dev \
-    spawn-fcgi \
-    && rm -rf /var/lib/apt/lists
-
-WORKDIR /home/
-COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
+COPY ./nginx/nginx.conf /home/etc/nginx/nginx.conf
 COPY ./hello.c .
 COPY ./run.sh .
 
-RUN chmod +x run.sh
+RUN apt-get update && apt-get upgrade -y && apt-get install -y nginx gcc spawn-fcgi libfcgi-dev && rm -rf /var/lib/apt/lists
 
-RUN groupadd -g 999 prunesga && \
-    useradd -r -u 999 -g prunesga prunesga
+RUN useradd prunesga; \
+    chown -R prunesga:prunesga /home; \
+    chown -R prunesga:prunesga /etc/nginx/nginx.conf; \
+    # Раздача прав для исправления INFO уязвимостей
+    chown -R prunesga:daemon /var/cache/nginx; \
+    touch /var/run/nginx.pid; \
+    chown -R prunesga:daemon /var/run/nginx.pid;
+
+
+
+#ENV DOCKER_CONTENT_TRUST=1
+
 USER prunesga
 
-ENTRYPOINT ["./run.sh"]
+HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost/ || exit 1
+
+ENTRYPOINT ["sh", "./run.sh"]
