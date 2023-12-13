@@ -1,20 +1,23 @@
 services:
-  my_server:
-    image: dockle:part5  # Замените на ваше имя образа и тег
-    networks:
-      - mynetwork  # Используем сеть для внутреннего общения
+  server:
+    build:
+      context: ../Part5
+      dockerfile: Dockerfile
+#    networks:
+#      - mynetwork
 
   nginx_proxy:
     image: nginx
+#    build: .
     ports:
-      - "8080:80"  # Маппинг порта контейнера nginx на порт хоста
+      - 80:8080
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf  # Подключение вашего nginx.conf
-    networks:
-      - mynetwork  # Используем ту же сеть для внутреннего общения
-    depends_on:
-      - my_server  # Указываем зависимость от первого контейнера
+      - ./nginx_proxy/nginx.conf:/etc/nginx/nginx.conf
+#    networks:
+#      - mynetwork  #
+#    depends_on:
+#      - server  #
 
-networks:
-  mynetwork:  # Создаем собственную сеть
-    driver: bridge
+#networks:
+#  mynetwork:  # Создаем собственную сеть
+ #   driver: bridge
