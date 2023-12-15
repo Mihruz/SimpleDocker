@@ -1,7 +1,6 @@
 FROM ubuntu
 WORKDIR /home
 
-COPY ./nginx.conf /home/etc/nginx/nginx.conf
 COPY ./hello.c .
 COPY ./run.sh .
 
